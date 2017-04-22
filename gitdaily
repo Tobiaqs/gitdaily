@@ -1,0 +1,86 @@
+#!/bin/bash
+
+ARGS="$@"
+
+# http://misc.flogisoft.com/bash/tip_colors_and_formatting
+META_COLOR="\e[92m"
+BASIC_COLOR="\e[36m"
+#HEADING_COLOR="\e[92m"
+SUBHEADING_COLOR="\e[96m"
+UNDERLINE_ON="\e[4m"
+UNDERLINE_OFF="\e[24m"
+GRAY_BG_ON="\e[100m"
+GRAY_BG_OFF="\e[49m"
+BOLD_ON="\e[1m"
+BOLD_OFF="\e[21m"
+
+VERSION="0.1"
+
+echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
+echo -en "GitDaily $VERSION"
+echo -e "$BOLD_OFF$GRAY_BG_OFF"
+
+function iteration {
+	if [[ -d "$dir" && -d "$dir/.git" ]]; then
+		GIT_STATUS=`git -C "$dir" status`
+		if [[ "$GIT_STATUS" != *"working directory clean"* ]]; then
+			echo -en "$HEADING_COLOR"
+			echo -en "$UNDERLINE_ON"
+			echo -n `basename "$dir"`
+			echo -en "$UNDERLINE_OFF"
+			if [[ "$ARGS" == *"-v"* ]]; then
+				echo
+				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
+
+				while read -r line; do
+					if [[ `echo "$line" | grep "^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"` != "" ]]; then
+						echo -e "$SUBHEADING_COLOR	$line"
+					else
+						echo -e "$BASIC_COLOR		$line"
+					fi
+				done <<< "$GIT_STATUS_FILTERED"
+				echo
+			else
+				echo -e "$SUBHEADING_COLOR is not clean."
+			fi
+		fi
+	fi	
+}
+
+if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
+	if [[ "$ARGS" == *"-ls"* ]]; then
+		INPUT="`pwd`/*"
+	elif [[ "$ARGS" == *"-l"* ]]; then
+		INPUT="`pwd`"
+	else
+		INPUT="`cat $HOME/.config/gitdaily_paths`"
+	fi
+
+	while read -r line; do
+		if [[ "$line" == *"*"* ]]; then
+			HEADING_COLOR="\e[92m"
+			line=`eval echo "${line%/*}"`
+			if [ -d "$line" ]; then
+				for dir in $line/*; do
+					iteration
+				done
+			else
+				echo "$dir (from config) does not exist!"
+			fi
+		else
+			dir=`eval echo "$line"`
+			HEADING_COLOR="\e[33m"
+			if [ -d "$dir" ]; then
+				iteration
+			else
+				echo "$dir (from config) does not exist!"
+			fi
+		fi
+	done <<< "$INPUT"
+fi
+
+if [[ "$ARGS" != *"-v"* ]]; then
+	echo
+fi
+
+echo -en "\e[39m"
