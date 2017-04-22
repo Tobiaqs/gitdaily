@@ -20,6 +20,10 @@ echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
 echo -en "GitDaily $VERSION"
 echo -e "$BOLD_OFF$GRAY_BG_OFF"
 
+if [[ "$ARGS" == *"-v"* || "$ARGS" == *"--version"* ]]; then
+	exit 0
+fi
+
 function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
 		GIT_STATUS=`git -C "$dir" status`
@@ -28,7 +32,7 @@ function iteration {
 			echo -en "$UNDERLINE_ON"
 			echo -n `basename "$dir"`
 			echo -en "$UNDERLINE_OFF"
-			if [[ "$ARGS" == *"-v"* ]]; then
+			if [[ "$ARGS" != *"-c"* ]]; then
 				echo
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
@@ -79,7 +83,7 @@ if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
 	done <<< "$INPUT"
 fi
 
-if [[ "$ARGS" != *"-v"* ]]; then
+if [[ "$ARGS" == *"-c"* ]]; then
 	echo
 fi
 
