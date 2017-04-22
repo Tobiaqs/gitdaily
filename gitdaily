@@ -18,9 +18,23 @@ VERSION="0.1"
 
 echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
 echo -en "GitDaily $VERSION"
-echo -e "$BOLD_OFF$GRAY_BG_OFF"
+echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
 
 if [[ "$ARGS" == *"-v"* || "$ARGS" == *"--version"* ]]; then
+	exit 0
+fi
+
+if [[ "$ARGS" == *"-h"* || "$ARGS" == *"--help"* ]]; then
+	echo -en "$META_COLOR"
+	echo "GitDaily will look for a configuration file in ~/.config/gitdaily_paths."
+	echo -e "See the readme for more information on the format of this file.\n"
+	echo -e "Usage:\n"
+	echo "  -h/--help	Show help message"
+	echo "  -v/--version	Display version"
+	echo "  -c		Compact view"
+	echo "  -l		Run locally, view status of current directory"
+	echo "  -ls		Run locally, view status of subdirectories"
+	echo
 	exit 0
 fi
 
@@ -51,40 +65,48 @@ function iteration {
 	fi	
 }
 
-if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
-	if [[ "$ARGS" == *"-ls"* ]]; then
-		INPUT="`pwd`/*"
-	elif [[ "$ARGS" == *"-l"* ]]; then
-		INPUT="`pwd`"
-	else
-		INPUT="`cat $HOME/.config/gitdaily_paths`"
+function terminate {
+	if [[ "$ARGS" == *"-c"* ]]; then
+		echo
 	fi
 
-	while read -r line; do
-		if [[ "$line" == *"*"* ]]; then
-			HEADING_COLOR="\e[92m"
-			line=`eval echo "${line%/*}"`
-			if [ -d "$line" ]; then
-				for dir in $line/*; do
-					iteration
-				done
-			else
-				echo "$dir (from config) does not exist!"
-			fi
-		else
-			dir=`eval echo "$line"`
-			HEADING_COLOR="\e[33m"
-			if [ -d "$dir" ]; then
+	echo -en "\e[39m"
+}
+
+if [[ "$ARGS" == *"-ls"* ]]; then
+	INPUT="`pwd`/*"
+elif [[ "$ARGS" == *"-l"* ]]; then
+	INPUT="`pwd`"
+else
+	if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
+		INPUT="`cat $HOME/.config/gitdaily_paths`"
+	else
+		echo -en "$META_COLOR"
+		echo -e "Configuration file doesn't exist at ~/.config/gitdaily_paths\n"
+		terminate
+	fi
+fi
+
+while read -r line; do
+	if [[ "$line" == *"*"* ]]; then
+		HEADING_COLOR="\e[92m"
+		line=`eval echo "${line%/*}"`
+		if [ -d "$line" ]; then
+			for dir in $line/*; do
 				iteration
-			else
-				echo "$dir (from config) does not exist!"
-			fi
+			done
+		else
+			echo "$dir (from config) does not exist!"
 		fi
-	done <<< "$INPUT"
-fi
+	else
+		dir=`eval echo "$line"`
+		HEADING_COLOR="\e[33m"
+		if [ -d "$dir" ]; then
+			iteration
+		else
+			echo "$dir (from config) does not exist!"
+		fi
+	fi
+done <<< "$INPUT"
 
-if [[ "$ARGS" == *"-c"* ]]; then
-	echo
-fi
-
-echo -en "\e[39m"
+terminate
