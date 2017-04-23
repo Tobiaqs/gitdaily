@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ARGS="$@"
+ARGS=" $@ "
 
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
 META_COLOR="\e[92m"
@@ -14,23 +14,24 @@ GRAY_BG_OFF="\e[49m"
 BOLD_ON="\e[1m"
 BOLD_OFF="\e[21m"
 
-VERSION="0.1"
+VERSION="0.2"
 
 echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
 echo -en "GitDaily $VERSION"
 echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
 
-if [[ "$ARGS" == *"-v"* || "$ARGS" == *"--version"* ]]; then
+if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
 	exit 0
 fi
 
-if [[ "$ARGS" == *"-h"* || "$ARGS" == *"--help"* ]]; then
+if [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo -en "$META_COLOR"
 	echo "GitDaily will look for a configuration file in ~/.config/gitdaily_paths."
 	echo -e "See the readme for more information on the format of this file.\n"
 	echo -e "Usage:\n"
 	echo "  -h/--help	Show help message"
 	echo "  -v/--version	Display version"
+	echo "  -a		View status for all repositories, even clean ones"
 	echo "  -c		Compact view"
 	echo "  -l		Run locally, view status of current directory"
 	echo "  -ls		Run locally, view status of subdirectories"
@@ -46,7 +47,7 @@ function iteration {
 			echo -en "$UNDERLINE_ON"
 			echo -n `basename "$dir"`
 			echo -en "$UNDERLINE_OFF"
-			if [[ "$ARGS" != *"-c"* ]]; then
+			if [[ "$ARGS" != *" -c "* ]]; then
 				echo
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
@@ -61,21 +62,27 @@ function iteration {
 			else
 				echo -e "$SUBHEADING_COLOR is not clean."
 			fi
+		elif [[ "$ARGS" == *" -a "* ]]; then
+			echo -en "$HEADING_COLOR"
+			echo -en "$UNDERLINE_ON"
+			echo -n `basename "$dir"`
+			echo -en "$UNDERLINE_OFF"
+			echo -e "$SUBHEADING_COLOR is clean."
 		fi
 	fi	
 }
 
 function terminate {
-	if [[ "$ARGS" == *"-c"* ]]; then
+	if [[ "$ARGS" == *" -c "* ]]; then
 		echo
 	fi
 
 	echo -en "\e[39m"
 }
 
-if [[ "$ARGS" == *"-ls"* ]]; then
+if [[ "$ARGS" == *" -ls "* ]]; then
 	INPUT="`pwd`/*"
-elif [[ "$ARGS" == *"-l"* ]]; then
+elif [[ "$ARGS" == *" -l "* ]]; then
 	INPUT="`pwd`"
 else
 	if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
@@ -88,7 +95,7 @@ else
 fi
 
 while read -r line; do
-	if [[ "$line" == *"*"* ]]; then
+	if [[ "$line" == *"/*"* ]]; then
 		HEADING_COLOR="\e[92m"
 		line=`eval echo "${line%/*}"`
 		if [ -d "$line" ]; then

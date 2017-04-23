@@ -1,4 +1,4 @@
-# GitDaily
+# GitDaily 0.2
 
 This is a bash shell script that allows you to easily see the status of all of your Git repositories. If you're like me, and you keep every single project in a different repository, it can be very useful to see on which repositories you need to work.
 
@@ -37,9 +37,20 @@ $ gitdaily -c
 The flags `-l` and `-ls` are mutually exclusive. `-c` can be used together with `-l` or `-ls`.
 
 ## Installation
+Navigate to a directory where you'd like to keep GitDaily.
+
 ```
 git clone https://github.com/Tobiaqs/gitdaily
 cd gitdaily
-sudo cp gitdaily /usr/local/bin
+sudo ln gitdaily /usr/local/bin/gitdaily
 cowsay "All done!"
+```
+
+## Updating
+Navigate to the directory where you keep GitDaily.
+
+```
+cd gitdaily
+git pull
+cowsay "Updated!"
 ```
