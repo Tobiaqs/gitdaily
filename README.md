@@ -40,17 +40,19 @@ The flags `-l` and `-ls` are mutually exclusive. `-c` can be used together with 
 Navigate to a directory where you'd like to keep GitDaily.
 
 ```
-git clone https://github.com/Tobiaqs/gitdaily
-cd gitdaily
-sudo ln gitdaily /usr/local/bin/gitdaily
-cowsay "All done!"
+git clone https://github.com/Tobiaqs/gitdaily && sudo ln gitdaily/gitdaily /usr/local/bin/gitdaily && cowsay "All done!"
 ```
 
 ## Updating
 Navigate to the directory where you keep GitDaily.
 
 ```
-cd gitdaily
-git pull
-cowsay "Updated!"
+cd gitdaily && git pull && cowsay "Updated!" && cd ..
+```
+
+## Deinstallation
+Navigate to the directory where you keep GitDaily.
+
+```
+sudo rm /usr/local/bin/gitdaily && rm -rf gitdaily && cowsay "GitDaily has been removed."
 ```
