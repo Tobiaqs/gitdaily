@@ -47,7 +47,7 @@ git clone https://github.com/Tobiaqs/gitdaily && sudo ln gitdaily/gitdaily /usr/
 Navigate to the directory where you keep GitDaily.
 
 ```
-cd gitdaily && git pull && cowsay "Updated!" && cd ..
+git -C gitdaily pull && cowsay "Updated!"
 ```
 
 ## Deinstallation
