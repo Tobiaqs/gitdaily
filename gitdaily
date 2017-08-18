@@ -14,15 +14,19 @@ GRAY_BG_OFF="\e[49m"
 BOLD_ON="\e[1m"
 BOLD_OFF="\e[21m"
 
-VERSION="0.2"
-
-echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
-echo -en "GitDaily $VERSION"
-echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
+VERSION="0.2.1"
 
 if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
+	echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
+	echo -en "GitDaily $VERSION"
+	echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
 	exit 0
 fi
+
+echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
+echo -en "GitDaily"
+echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
+
 
 if [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo -en "$META_COLOR"
