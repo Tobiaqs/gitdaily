@@ -13,25 +13,19 @@ GRAY_BG_OFF="\e[49m"
 BOLD_ON="\e[1m"
 BOLD_OFF="\e[21m"
 
+GITDAILY="${BOLD_ON}GitDaily${BOLD_OFF}"
 VERSION="0.2.2"
 
+echo -en "$META_COLOR"
+
 if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
-	echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
-	echo -en "GitDaily $VERSION"
-	echo -e "$BOLD_OFF$GRAY_BG_OFF"
+	echo -e "$GITDAILY $VERSION"
 	exit 0
-fi
-
-echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
-echo -en "GitDaily"
-echo -e "$BOLD_OFF$GRAY_BG_OFF"
-
-if [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
-	echo -en "$META_COLOR"
-	echo "GitDaily will look for a configuration file in ~/.config/gitdaily_paths."
-	echo -e "See the readme for more information on the format of this file."
+elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
+	echo -e "$GITDAILY will look for a configuration file in ~/.config/gitdaily_paths."
+	echo "See the readme for more information on the format of this file."
 	echo
-	echo -e "Usage:"
+	echo "Usage:"
 	echo
 	echo "  -h/--help	Show help message"
 	echo "  -v/--version	Display version"
@@ -41,6 +35,9 @@ if [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo "  -ls		Run locally, view status of subdirectories"
 	echo
 	exit 0
+else
+	echo -e "$GITDAILY"
+	echo
 fi
 
 function iteration {
