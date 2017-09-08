@@ -1,5 +1,3 @@
-#!/bin/bash
-
 ARGS=" $@ "
 
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
@@ -62,7 +60,7 @@ fi
 function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
 		GIT_STATUS=`git -C "$dir" status`
-		if [[ "$GIT_STATUS" != *"working directory clean"* ]]; then
+		if [[ "$GIT_STATUS" != *"clean"* ]]; then
 			if [[ "$ARGS" != *" -c "* ]]; then
 				writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF"
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
