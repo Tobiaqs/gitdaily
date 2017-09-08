@@ -1,4 +1,17 @@
-# GitDaily 0.2
+# GitDaily 0.3
+
+```
+┌────────────────────────────────┐
+│            GitDaily            │
+├────────────────────────────────┤
+│ dotfiles is not clean.
+├────────────────────────────────┤
+│ gitdaily is not clean.
+├────────────────────────────────┤
+│ Sat Sep  9 13:37:00 CEST 2017  │
+└────────────────────────────────┘
+```
+
 
 This is a bash shell script that allows you to easily see the status of all of your Git repositories. If you're like me, and you keep every single project in a different repository, it can be very useful to see on which repositories you need to work.
 

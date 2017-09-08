@@ -1,52 +1,73 @@
 ARGS=" $@ "
 
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
-META_COLOR="\e[92m"
+# Foregrounds
+DEFAULT_FOREGROUND="\e[39m"
+ALPHA_COLOR="\e[34m"
+META_COLOR="\e[90m"
+PAPER_COLOR="\e[37m"
 BASIC_COLOR="\e[36m"
+FOLDER_COLOR="${ALPHA_COLOR}"
+LOCAL_FOLDER_COLOR="\e[33m"
+HEADING_COLOR=""
 SUBHEADING_COLOR="\e[96m"
+# Formats
 UNDERLINE_ON="\e[4m"
 UNDERLINE_OFF="\e[24m"
-GRAY_BG_ON="\e[100m"
-GRAY_BG_OFF="\e[49m"
 BOLD_ON="\e[1m"
 BOLD_OFF="\e[21m"
 
 GITDAILY="${BOLD_ON}GitDaily${BOLD_OFF}"
-VERSION="0.2.2"
+VERSION="0.3.0"
+
+PAPERLINE="────────────────────────────────"
+
+function openPaper {	
+	echo -e "${META_COLOR}┌${PAPERLINE}┐"
+	writePaper "           ${ALPHA_COLOR}${GITDAILY}${META_COLOR}            │"
+	writePaper
+}
 
 function writePaper {
-	echo -e "$META_COLOR│ $1"
+	if [[ "${1}" == "" ]]; then
+		echo -e "${META_COLOR}├${PAPERLINE}┤"
+	else
+		echo -e "${META_COLOR}│ ${1}"
+	fi
 }
 
 function closePaper {
-	echo -e "${META_COLOR}└──────────────────────────\e[39m"
-	exit 0
+	writePaper "${PAPER_COLOR}$(date)${META_COLOR}  │"
+	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
 }
 
 if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
-	echo -e "$GITDAILY $VERSION"
+	openPaper
+	writePaper "${PAPER_COLOR}$GITDAILY version $VERSION"
+	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${BOLD_OFF}"
+	writePaper
+	closePaper
 	exit 0
 elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo -e "$GITDAILY will look for a configuration file in ~/.config/gitdaily_paths."
 	echo "See the readme for more information on the format of this file."
 	echo
-	echo "Usage:"
-	echo
-	echo "  -h/--help	Show help message"
-	echo "  -v/--version	Display version"
-	echo "  -a		View status for all repositories, even clean ones"
-	echo "  -c		Compact view"
-	echo "  -l		Run locally, view status of current directory"
-	echo "  -ls		Run locally, view status of subdirectories"
+	echo "Usage options:"
+	echo "	-h, --help	Show help message"
+	echo "	-v, --version	Display version"
+	echo "	-a, --all	View status for all repositories, even clean ones"
+	echo "	-c, --compact	Compact view"
+	echo "	-l, --local	Run locally, view status of current directory"
+	echo "	-s, --subdir	Run locally, view status of subdirectories"
 	echo
 	exit 0
 else
-	echo -e "┌──────── $GITDAILY ────────"
+	openPaper
 fi
 
-if [[ "$ARGS" == *" -ls "* ]]; then
+if [[ "$ARGS" == *" -s "* || "$ARGS" == *" --subdir "* ]]; then
 	INPUT="`pwd`/*"
-elif [[ "$ARGS" == *" -l "* ]]; then
+elif [[ "$ARGS" == *" -l "* || "$ARGS" == *" --local "* ]]; then
 	INPUT="`pwd`"
 else
 	if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
@@ -54,38 +75,42 @@ else
 	else
 		writePaper "Configuration file doesn't exist at ~/.config/gitdaily_paths"
 		closePaper
+		exit 0
 	fi
 fi
 
 function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
 		GIT_STATUS=`git -C "$dir" status`
+		local BASENAME="$HEADING_COLOR$BOLD_ON$UNDERLINE_ON$(basename "$dir")$BOLD_OFF$UNDERLINE_OFF"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
-			if [[ "$ARGS" != *" -c "* ]]; then
-				writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF"
+			if [[ "$ARGS" != *" -c "* || "$ARGS" == *" --compact "* ]]; then
+				writePaper "${BASENAME}"
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
 				while read -r line; do
 					if [[ `echo "$line" | grep "^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"` != "" ]]; then
-						writePaper "$SUBHEADING_COLOR	$line"
+						writePaper "$SUBHEADING_COLOR$line"
 					else
-						writePaper "$BASIC_COLOR		$line"
+						writePaper "$BASIC_COLOR    $line"
 					fi
-				done <<< "$GIT_STATUS_FILTERED"
+				done <<< "${GIT_STATUS_FILTERED}"
 				writePaper 
 			else
-				writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF$SUBHEADING_COLOR is not clean."
+				writePaper "${BASENAME}${SUBHEADING_COLOR} is not clean."
+				writePaper
 			fi
-		elif [[ "$ARGS" == *" -a "* ]]; then
-			writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF$SUBHEADING_COLOR is clean."
+		elif [[ "$ARGS" == *" -a "* || "$ARGS" == *" --all "* ]]; then
+			writePaper "${BASENAME}${SUBHEADING_COLOR} is clean."
+			writePaper
 		fi
 	fi	
 }
 
 while read -r line; do
 	if [[ "$line" == *"/*"* ]]; then
-		HEADING_COLOR="\e[92m"
 		line=`eval echo "${line%/*}"`
+		HEADING_COLOR="${FOLDER_COLOR}"
 		if [ -d "$line" ]; then
 			for dir in $line/*; do
 				iteration
@@ -95,7 +120,7 @@ while read -r line; do
 		fi
 	else
 		dir=`eval echo "$line"`
-		HEADING_COLOR="\e[33m"
+		HEADING_COLOR="${LOCAL_FOLDER_COLOR}"
 		if [ -d "$dir" ]; then
 			iteration
 		else
