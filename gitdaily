@@ -5,7 +5,6 @@ ARGS=" $@ "
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
 META_COLOR="\e[92m"
 BASIC_COLOR="\e[36m"
-#HEADING_COLOR="\e[92m"
 SUBHEADING_COLOR="\e[96m"
 UNDERLINE_ON="\e[4m"
 UNDERLINE_OFF="\e[24m"
@@ -14,25 +13,26 @@ GRAY_BG_OFF="\e[49m"
 BOLD_ON="\e[1m"
 BOLD_OFF="\e[21m"
 
-VERSION="0.2.1"
+VERSION="0.2.2"
 
 if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
 	echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
 	echo -en "GitDaily $VERSION"
-	echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
+	echo -e "$BOLD_OFF$GRAY_BG_OFF"
 	exit 0
 fi
 
 echo -en "$META_COLOR$GRAY_BG_ON$BOLD_ON"
 echo -en "GitDaily"
-echo -e "$BOLD_OFF$GRAY_BG_OFF\n"
-
+echo -e "$BOLD_OFF$GRAY_BG_OFF"
 
 if [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo -en "$META_COLOR"
 	echo "GitDaily will look for a configuration file in ~/.config/gitdaily_paths."
-	echo -e "See the readme for more information on the format of this file.\n"
-	echo -e "Usage:\n"
+	echo -e "See the readme for more information on the format of this file."
+	echo
+	echo -e "Usage:"
+	echo
 	echo "  -h/--help	Show help message"
 	echo "  -v/--version	Display version"
 	echo "  -a		View status for all repositories, even clean ones"
@@ -93,7 +93,8 @@ else
 		INPUT="`cat $HOME/.config/gitdaily_paths`"
 	else
 		echo -en "$META_COLOR"
-		echo -e "Configuration file doesn't exist at ~/.config/gitdaily_paths\n"
+		echo -e "Configuration file doesn't exist at ~/.config/gitdaily_paths"
+		echo
 		terminate
 	fi
 fi
