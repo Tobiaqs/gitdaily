@@ -16,7 +16,14 @@ BOLD_OFF="\e[21m"
 GITDAILY="${BOLD_ON}GitDaily${BOLD_OFF}"
 VERSION="0.2.2"
 
-echo -en "$META_COLOR"
+function writePaper {
+	echo -e "$META_COLOR│ $1"
+}
+
+function closePaper {
+	echo -e "${META_COLOR}└──────────────────────────\e[39m"
+	exit 0
+}
 
 if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
 	echo -e "$GITDAILY $VERSION"
@@ -36,50 +43,8 @@ elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo
 	exit 0
 else
-	echo -e "$GITDAILY"
-	echo
+	echo -e "┌──────── $GITDAILY ────────"
 fi
-
-function iteration {
-	if [[ -d "$dir" && -d "$dir/.git" ]]; then
-		GIT_STATUS=`git -C "$dir" status`
-		if [[ "$GIT_STATUS" != *"working directory clean"* ]]; then
-			echo -en "$HEADING_COLOR"
-			echo -en "$UNDERLINE_ON"
-			echo -n `basename "$dir"`
-			echo -en "$UNDERLINE_OFF"
-			if [[ "$ARGS" != *" -c "* ]]; then
-				echo
-				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
-
-				while read -r line; do
-					if [[ `echo "$line" | grep "^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"` != "" ]]; then
-						echo -e "$SUBHEADING_COLOR	$line"
-					else
-						echo -e "$BASIC_COLOR		$line"
-					fi
-				done <<< "$GIT_STATUS_FILTERED"
-				echo
-			else
-				echo -e "$SUBHEADING_COLOR is not clean."
-			fi
-		elif [[ "$ARGS" == *" -a "* ]]; then
-			echo -en "$HEADING_COLOR"
-			echo -en "$UNDERLINE_ON"
-			echo -n `basename "$dir"`
-			echo -en "$UNDERLINE_OFF"
-			echo -e "$SUBHEADING_COLOR is clean."
-		fi
-	fi	
-}
-
-function terminate {
-	if [[ "$ARGS" == *" -c "* ]]; then
-		echo
-	fi
-
-	echo -en "\e[39m"
-}
 
 if [[ "$ARGS" == *" -ls "* ]]; then
 	INPUT="`pwd`/*"
@@ -89,12 +54,35 @@ else
 	if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
 		INPUT="`cat $HOME/.config/gitdaily_paths`"
 	else
-		echo -en "$META_COLOR"
-		echo -e "Configuration file doesn't exist at ~/.config/gitdaily_paths"
-		echo
-		terminate
+		writePaper "Configuration file doesn't exist at ~/.config/gitdaily_paths"
+		closePaper
 	fi
 fi
+
+function iteration {
+	if [[ -d "$dir" && -d "$dir/.git" ]]; then
+		GIT_STATUS=`git -C "$dir" status`
+		if [[ "$GIT_STATUS" != *"working directory clean"* ]]; then
+			if [[ "$ARGS" != *" -c "* ]]; then
+				writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF"
+				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
+
+				while read -r line; do
+					if [[ `echo "$line" | grep "^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"` != "" ]]; then
+						writePaper "$SUBHEADING_COLOR	$line"
+					else
+						writePaper "$BASIC_COLOR		$line"
+					fi
+				done <<< "$GIT_STATUS_FILTERED"
+				writePaper 
+			else
+				writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF$SUBHEADING_COLOR is not clean."
+			fi
+		elif [[ "$ARGS" == *" -a "* ]]; then
+			writePaper "$HEADING_COLOR$UNDERLINE_ON$(basename "$dir")$UNDERLINE_OFF$SUBHEADING_COLOR is clean."
+		fi
+	fi	
+}
 
 while read -r line; do
 	if [[ "$line" == *"/*"* ]]; then
@@ -105,7 +93,7 @@ while read -r line; do
 				iteration
 			done
 		else
-			echo "$dir (from config) does not exist!"
+			writePaper "$dir (from config) does not exist!"
 		fi
 	else
 		dir=`eval echo "$line"`
@@ -113,9 +101,9 @@ while read -r line; do
 		if [ -d "$dir" ]; then
 			iteration
 		else
-			echo "$dir (from config) does not exist!"
+			writePaper "$dir (from config) does not exist!"
 		fi
 	fi
 done <<< "$INPUT"
 
-terminate
+closePaper
