@@ -90,7 +90,7 @@ function iteration {
 		GIT_STATUS=`git -C "$dir" status`
 		local BASENAME="$HEADING_COLOR$BOLD_ON$UNDERLINE_ON$(basename "$dir")$BOLD_OFF$UNDERLINE_OFF"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
-			if [[ "$ARGS" != *" -c "* || "$ARGS" == *" --compact "* ]]; then
+			if [[ "$ARGS" != *" -c "* || "$ARGS" != *" --compact "* ]]; then
 				writePaper "${BASENAME}"
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
