@@ -19,8 +19,11 @@ BOLD_OFF="\e[21m"
 
 GITDAILY="${BOLD_ON}GitDaily${BOLD_OFF}"
 VERSION="0.3.0"
+BUZZWORD="clean"
 
 PAPERLINE="────────────────────────────────"
+REPO_COUNT=0
+BUZZ_COUNT=0
 
 function openPaper {	
 	echo -e "${META_COLOR}┌${PAPERLINE}┐"
@@ -37,7 +40,7 @@ function writePaper {
 }
 
 function closePaper {
-	writePaper "${PAPER_COLOR}$(date)${META_COLOR}  │"
+	writePaper "${PAPER_COLOR}# ${BUZZ_COUNT}/${REPO_COUNT}	${BUZZWORD}		$(date +%T)${META_COLOR} │"
 	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
 }
 
@@ -55,7 +58,7 @@ elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo "Usage options:"
 	echo "	-h, --help	Show help message"
 	echo "	-v, --version	Display version"
-	echo "	-a, --all	View status for all repositories, even clean ones"
+	echo "	-a, --all	View status for all repositories, even ${BUZZWORD} ones"
 	echo "	-c, --compact	Compact view"
 	echo "	-l, --local	Run locally, view status of current directory"
 	echo "	-s, --subdir	Run locally, view status of subdirectories"
@@ -83,6 +86,7 @@ fi
 
 function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
+		((REPO_COUNT++))
 		GIT_STATUS=`git -C "$dir" status`
 		local BASENAME="$HEADING_COLOR$BOLD_ON$UNDERLINE_ON$(basename "$dir")$BOLD_OFF$UNDERLINE_OFF"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
@@ -99,12 +103,15 @@ function iteration {
 				done <<< "${GIT_STATUS_FILTERED}"
 				writePaper 
 			else
-				writePaper "${BASENAME}${SUBHEADING_COLOR} is not clean."
+				writePaper "${BASENAME}${SUBHEADING_COLOR} is not ${BUZZWORD}."
 				writePaper
 			fi
-		elif [[ "$ARGS" == *" -a "* || "$ARGS" == *" --all "* ]]; then
-			writePaper "${BASENAME}${SUBHEADING_COLOR} is clean."
-			writePaper
+		else
+			((BUZZ_COUNT++))
+			if [[ "$ARGS" == *" -a "* || "$ARGS" == *" --all "* ]]; then
+				writePaper "${BASENAME}${SUBHEADING_COLOR} is ${BUZZWORD}."
+				writePaper
+			fi
 		fi
 	fi	
 }
