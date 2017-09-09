@@ -37,7 +37,9 @@ function writePaper {
 
 function closePaper {
 	if [ -n "$MESSAGE" ]; then
-		writePaper "${ALPHA_COLOR}${MESSAGE}"
+		while IFS= read -r line; do
+			writePaper "${ALPHA_COLOR}${line}"
+		done <<< "${MESSAGE}"
 		writePaper
 	fi
 	writePaper "${PAPER_COLOR}# ${BUZZ_COUNT}/${REPO_COUNT}	${BUZZWORD}		$(date +%T)${META_COLOR} │"
