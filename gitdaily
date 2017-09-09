@@ -1,5 +1,3 @@
-ARGS=" $@ "
-
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
 # Foregrounds
 DEFAULT_FOREGROUND="\e[39m"
@@ -16,12 +14,12 @@ BOLD_ON="\e[1m"
 BOLD_OFF="\e[21m"
 
 GITDAILY="${BOLD_ON}GitDaily${BOLD_OFF}"
-VERSION="0.3.0"
+VERSION="0.3.1"
 BUZZWORD="clean"
 
-PAPERLINE="────────────────────────────────"
 REPO_COUNT=0
 BUZZ_COUNT=0
+PAPERLINE="────────────────────────────────"
 
 function openPaper {	
 	echo -e "${META_COLOR}┌${PAPERLINE}┐"
@@ -38,17 +36,26 @@ function writePaper {
 }
 
 function closePaper {
+	if [ -n "$MESSAGE" ]; then
+		writePaper "${ALPHA_COLOR}${MESSAGE}"
+		writePaper
+	fi
 	writePaper "${PAPER_COLOR}# ${BUZZ_COUNT}/${REPO_COUNT}	${BUZZWORD}		$(date +%T)${META_COLOR} │"
 	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
 }
 
-if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
-	openPaper
-	writePaper "${PAPER_COLOR}$GITDAILY version $VERSION"
-	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${BOLD_OFF}"
-	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
-	exit 0
-elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
+# Arguments
+ALL=false
+COMPACT=false
+FROM_CONFIG=true
+MESSAGE=""
+
+# https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+	-h|--help)
 	echo -e "$GITDAILY will look for a configuration file in ~/.config/gitdaily_paths."
 	echo "See the readme for more information on the format of this file."
 	echo
@@ -61,15 +68,38 @@ elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo "	-s, --subdir	Run locally, view status of subdirectories"
 	echo
 	exit 0
-else
+	;;
+	-v|--version)
 	openPaper
-fi
-
-if [[ "$ARGS" == *" -s "* || "$ARGS" == *" --subdir "* ]]; then
-	INPUT="`pwd`/*"
-elif [[ "$ARGS" == *" -l "* || "$ARGS" == *" --local "* ]]; then
+	writePaper "${PAPER_COLOR}$GITDAILY version $VERSION"
+	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${BOLD_OFF}"
+	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
+	exit 0
+	;;
+	-a|--all)
+	ALL=true
+	;;
+	-c|--compact)
+	COMPACT=true
+	;;
+	-l|--local)
 	INPUT="`pwd`"
-else
+	FROM_CONFIG=false
+	;;
+	-s|--subdir)
+	INPUT="`pwd`/*"
+	FROM_CONFIG=false
+	;;
+	*)
+	MESSAGE="$key"
+	;;
+esac
+shift
+done
+
+openPaper
+
+if [ "$FROM_CONFIG" = true ]; then
 	if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
 		INPUT="`cat $HOME/.config/gitdaily_paths`"
 	else
@@ -88,7 +118,7 @@ function iteration {
 		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${UNDERLINE_OFF}${BOLD_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
 			writePaper "${ALPHA_COLOR}${BASENAME} is not ${BUZZWORD}."
-			if [[ "$ARGS" != *" -c "* && "$ARGS" != *" --compact "* ]]; then
+			if [ "$COMPACT" = false ]; then
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
 				while read -r line; do
@@ -102,7 +132,7 @@ function iteration {
 			writePaper
 		else
 			((BUZZ_COUNT++))
-			if [[ "$ARGS" == *" -a "* || "$ARGS" == *" --all "* ]]; then
+			if [ "$ALL" = true ]; then
 				writePaper "${CLEAN_COLOR}${BASENAME} is ${BUZZWORD}."
 				writePaper
 			fi

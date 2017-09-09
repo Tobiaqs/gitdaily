@@ -63,6 +63,12 @@ $ gitdaily -v
 $ gitdaily --version
 ```
 
+Add a custom message to the newspaper, it will display just above the footer:
+```
+$ gitdaily "Hello world"
+$ gitdaily "$(fortune)"
+```
+
 > The flags `-l` and `-s` are mutually exclusive. `-c` can be used together with `-l` or `-s`.
 
 ## Installation
