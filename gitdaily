@@ -114,7 +114,7 @@ fi
 function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
 		((REPO_COUNT++))
-		GIT_STATUS=`git -C "$dir" status`
+		local GIT_STATUS=`git -C "$dir" status`
 		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${UNDERLINE_OFF}${BOLD_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
 			writePaper "${ALPHA_COLOR}${BASENAME} is not ${BUZZWORD}."
@@ -141,6 +141,10 @@ function iteration {
 }
 
 while read -r line; do
+	if [ "$COMPACT" = false ]; then
+		writePaper "${PAPER_COLOR}From ${line}"
+		writePaper
+	fi
 	if [[ "$line" == *"/*"* ]]; then
 		line=`eval echo "${line%/*}"`
 		if [ -d "$line" ]; then
