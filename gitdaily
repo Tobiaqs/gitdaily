@@ -73,9 +73,11 @@ else
 	if [[ -d "$HOME/.config" && -f "$HOME/.config/gitdaily_paths" ]]; then
 		INPUT="`cat $HOME/.config/gitdaily_paths`"
 	else
-		writePaper "Configuration file doesn't exist at ~/.config/gitdaily_paths"
-		closePaper
-		exit 0
+		writePaper "Configuration file not found at"
+		writePaper "${PAPER_COLOR}~/.config/gitdaily_paths"
+		writePaper "Checking local subdirectories"
+		writePaper
+		INPUT="`pwd` /*"
 	fi
 fi
 
