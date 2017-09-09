@@ -39,7 +39,7 @@ $ gitdaily -l
 
 When you're in a folder and you want to see the statuses of its subdirectories (will skip non-Git folders):
 ```
-$ gitdaily -ls
+$ gitdaily -s
 ```
 
 When you just want a compact list of which repositories aren't clean:
@@ -47,7 +47,7 @@ When you just want a compact list of which repositories aren't clean:
 $ gitdaily -c
 ```
 
-The flags `-l` and `-ls` are mutually exclusive. `-c` can be used together with `-l` or `-ls`.
+The flags `-l` and `-s` are mutually exclusive. `-c` can be used together with `-l` or `-s`.
 
 ## Installation
 Navigate to a directory where you'd like to keep GitDaily.
