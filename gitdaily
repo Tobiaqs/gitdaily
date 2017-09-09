@@ -46,8 +46,7 @@ if [[ "$ARGS" == *" -v "* || "$ARGS" == *" --version "* ]]; then
 	openPaper
 	writePaper "${PAPER_COLOR}$GITDAILY version $VERSION"
 	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${BOLD_OFF}"
-	writePaper
-	closePaper
+	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
 	exit 0
 elif [[ "$ARGS" == *" -h "* || "$ARGS" == *" --help "* ]]; then
 	echo -e "$GITDAILY will look for a configuration file in ~/.config/gitdaily_paths."
