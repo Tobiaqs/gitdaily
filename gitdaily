@@ -89,7 +89,7 @@ function iteration {
 		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${UNDERLINE_OFF}${BOLD_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
 			writePaper "${ALPHA_COLOR}${BASENAME} is not ${BUZZWORD}."
-			if [[ "$ARGS" != *" -c "* || "$ARGS" != *" --compact "* ]]; then
+			if [[ "$ARGS" != *" -c "* && "$ARGS" != *" --compact "* ]]; then
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
 				while read -r line; do
