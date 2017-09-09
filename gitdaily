@@ -3,14 +3,12 @@ ARGS=" $@ "
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
 # Foregrounds
 DEFAULT_FOREGROUND="\e[39m"
-ALPHA_COLOR="\e[34m"
+ALPHA_COLOR="\e[94m"
 META_COLOR="\e[90m"
 PAPER_COLOR="\e[37m"
-BASIC_COLOR="\e[36m"
-FOLDER_COLOR="${ALPHA_COLOR}"
-LOCAL_FOLDER_COLOR="\e[33m"
-HEADING_COLOR=""
-SUBHEADING_COLOR="\e[96m"
+CLEAN_COLOR="\e[92m"
+REPO_STATUS_COLOR="\e[96m"
+REPO_INFO_COLOR="\e[36m"
 # Formats
 UNDERLINE_ON="\e[4m"
 UNDERLINE_OFF="\e[24m"
@@ -88,28 +86,25 @@ function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
 		((REPO_COUNT++))
 		GIT_STATUS=`git -C "$dir" status`
-		local BASENAME="$HEADING_COLOR$BOLD_ON$UNDERLINE_ON$(basename "$dir")$BOLD_OFF$UNDERLINE_OFF"
+		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${UNDERLINE_OFF}${BOLD_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
+			writePaper "${ALPHA_COLOR}${BASENAME} is not ${BUZZWORD}."
 			if [[ "$ARGS" != *" -c "* || "$ARGS" != *" --compact "* ]]; then
-				writePaper "${BASENAME}"
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
 				while read -r line; do
 					if [[ `echo "$line" | grep "^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"` != "" ]]; then
-						writePaper "$SUBHEADING_COLOR$line"
+						writePaper "${REPO_STATUS_COLOR}${line}"
 					else
-						writePaper "$BASIC_COLOR    $line"
+						writePaper "${REPO_INFO_COLOR}    ${line}"
 					fi
 				done <<< "${GIT_STATUS_FILTERED}"
-				writePaper 
-			else
-				writePaper "${BASENAME}${SUBHEADING_COLOR} is not ${BUZZWORD}."
-				writePaper
 			fi
+			writePaper
 		else
 			((BUZZ_COUNT++))
 			if [[ "$ARGS" == *" -a "* || "$ARGS" == *" --all "* ]]; then
-				writePaper "${BASENAME}${SUBHEADING_COLOR} is ${BUZZWORD}."
+				writePaper "${CLEAN_COLOR}${BASENAME} is ${BUZZWORD}."
 				writePaper
 			fi
 		fi
@@ -119,7 +114,6 @@ function iteration {
 while read -r line; do
 	if [[ "$line" == *"/*"* ]]; then
 		line=`eval echo "${line%/*}"`
-		HEADING_COLOR="${FOLDER_COLOR}"
 		if [ -d "$line" ]; then
 			for dir in $line/*; do
 				iteration
@@ -129,7 +123,6 @@ while read -r line; do
 		fi
 	else
 		dir=`eval echo "$line"`
-		HEADING_COLOR="${LOCAL_FOLDER_COLOR}"
 		if [ -d "$dir" ]; then
 			iteration
 		else
