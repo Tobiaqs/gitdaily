@@ -36,6 +36,9 @@ function writePaper {
 }
 
 function closePaper {
+	if [ "$COMPACT" = true ]; then
+		writePaper
+	fi
 	if [ -n "$MESSAGE" ]; then
 		while IFS= read -r line; do
 			writePaper "${ALPHA_COLOR}${line}"
@@ -130,13 +133,15 @@ function iteration {
 						writePaper "${REPO_INFO_COLOR}    ${line}"
 					fi
 				done <<< "${GIT_STATUS_FILTERED}"
+				writePaper
 			fi
-			writePaper
 		else
 			((BUZZ_COUNT++))
 			if [ "$ALL" = true ]; then
 				writePaper "${CLEAN_COLOR}${BASENAME} is ${BUZZWORD}."
-				writePaper
+				if [ "$COMPACT" = false ]; then
+					writePaper
+				fi
 			fi
 		fi
 	fi	
