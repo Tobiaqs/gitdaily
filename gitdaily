@@ -45,7 +45,7 @@ function closePaper {
 		done <<< "${MESSAGE}"
 		writePaper
 	fi
-	writePaper "${PAPER_COLOR}# ${BUZZ_COUNT}/${REPO_COUNT}	${BUZZWORD}		$(date +%T)${META_COLOR} │"
+	writePaper "${PAPER_COLOR}# ${BUZZ_COUNT}/${REPO_COUNT} ${BUZZWORD}		$(date +%T)${META_COLOR} │"
 	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
 }
 
