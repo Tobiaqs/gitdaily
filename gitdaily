@@ -9,11 +9,10 @@ REPO_STATUS_COLOR="\e[96m"
 REPO_INFO_COLOR="\e[36m"
 # Formats
 UNDERLINE_ON="\e[4m"
-UNDERLINE_OFF="\e[24m"
 BOLD_ON="\e[1m"
-BOLD_OFF="\e[21m"
+STYLE_OFF="\e[0m"
 
-GITDAILY="${BOLD_ON}GitDaily${BOLD_OFF}"
+GITDAILY="${BOLD_ON}GitDaily${STYLE_OFF}"
 VERSION="0.3.1"
 BUZZWORD="clean"
 
@@ -77,7 +76,7 @@ case $key in
 	-v|--version)
 	openPaper
 	writePaper "${PAPER_COLOR}$GITDAILY version $VERSION"
-	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${BOLD_OFF}"
+	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${STYLE_OFF}"
 	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
 	exit 0
 	;;
@@ -120,7 +119,7 @@ function iteration {
 	if [[ -d "$dir" && -d "$dir/.git" ]]; then
 		((REPO_COUNT++))
 		local GIT_STATUS=`git -C "$dir" status`
-		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${UNDERLINE_OFF}${BOLD_OFF}"
+		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${STYLE_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
 			writePaper "${ALPHA_COLOR}${BASENAME} is not ${BUZZWORD}."
 			if [ "$COMPACT" = false ]; then
