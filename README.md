@@ -5,14 +5,14 @@ This is a bash shell script that allows you to easily see the status of all of y
 gitdaily --all --compact
 ```
 ```
-┌────────────────────────────────┐
-│            GitDaily            │
-├────────────────────────────────┤
-│ dotfiles is clean.
-│ gitdaily is clean.
-├────────────────────────────────┤
-│ # 2/2 clean           13:37:00 │
-└────────────────────────────────┘
+─────────────────────────────────────────────────
+ GitDaily
+─────────────────────────────────────────────────
+ dotfiles is clean.
+ gitdaily is clean.
+─────────────────────────────────────────────────
+ # 2/2 clean  13:37:00
+─────────────────────────────────────────────────
 ```
 
 ## Configuration
