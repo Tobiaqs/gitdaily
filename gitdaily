@@ -55,6 +55,7 @@ function closePaper {
 # Arguments
 ALL=false
 COMPACT=false
+SHOW_FOLDER=false
 FROM_CONFIG=true
 MESSAGE=""
 
@@ -97,6 +98,9 @@ case $key in
 	-s|--subdir)
 	INPUT="`pwd`/*"
 	FROM_CONFIG=false
+	;;
+	-p|--parent)
+	SHOW_FOLDER=true
 	;;
 	*)
 	MESSAGE="$key"
@@ -151,7 +155,7 @@ function iteration {
 }
 
 while read -r line; do
-	if [ "$COMPACT" = false ]; then
+	if [ "$SHOW_FOLDER" = true ]; then
 		writePaper "${PAPER_COLOR}From ${line}"
 		writePaper
 	fi

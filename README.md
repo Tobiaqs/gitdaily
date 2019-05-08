@@ -10,8 +10,9 @@ gitdaily --all --compact
 ─────────────────────────────────────────────────
  dotfiles is clean.
  gitdaily is clean.
+ dirtyrepo is not clean
 ─────────────────────────────────────────────────
- # 2/2 clean  13:37:00
+ # 2/3 clean  13:37:00
 ─────────────────────────────────────────────────
 ```
 
@@ -48,6 +49,12 @@ When you just want a compact list of which repositories aren't clean:
 ```
 $ gitdaily -c
 $ gitdaily --compact
+```
+
+When you want to know where the repository resides:
+```
+$ gitdaily -p
+$ gitdaily --parent
 ```
 
 When you want to see the help:
