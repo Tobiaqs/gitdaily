@@ -19,37 +19,35 @@ BUZZWORD="clean"
 REPO_COUNT=0
 BUZZ_COUNT=0
 line="─"
-indent=0
 PAPERLINE=""
-columns=$[`tput cols`-$indent]
+columns=`tput cols`
 for i in `seq $columns`; do PAPERLINE="${PAPERLINE}${line}"; done
 
 function openPaper {
-	echo -e "${META_COLOR}${PAPERLINE}" # ┬
+	echo -e "${META_COLOR}${PAPERLINE}"
 	writePaper "${ALPHA_COLOR}${GITDAILY}${META_COLOR}"
 	writePaper
 }
 
 function writePaper {
 	if [[ "${1}" == "" ]]; then
-		echo -e "${META_COLOR}${PAPERLINE}" # ┼
+		echo -e "${META_COLOR}${PAPERLINE}"
 	else
-		echo -e "${META_COLOR} ${1}" # │
+		echo -e "${META_COLOR} ${1}"
 	fi
 }
 
 function closePaper {
-	if [ "$COMPACT" = true ]; then
-		writePaper
-	fi
+	writePaper
 	if [ -n "$MESSAGE" ]; then
 		while IFS= read -r line; do
 			writePaper "${ALPHA_COLOR}${line}"
 		done <<< "${MESSAGE}"
 		writePaper
 	fi
-	writePaper "${PAPER_COLOR}# ${BUZZ_COUNT}/${REPO_COUNT} ${BUZZWORD}\t$(date +%T)${META_COLOR}"
-	echo -e "${META_COLOR}${PAPERLINE}${DEFAULT_FOREGROUND}" # ┴
+	local percentage=$((100*$BUZZ_COUNT/$REPO_COUNT))
+	writePaper "${PAPER_COLOR}${percentage}% of ${REPO_COUNT} repos ${BUZZWORD}${META_COLOR}"
+	echo -e "${META_COLOR}${PAPERLINE}${DEFAULT_FOREGROUND}"
 }
 
 # Arguments
@@ -135,20 +133,16 @@ function iteration {
 
 				while read -r line; do
 					if [[ `echo "$line" | grep "^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"` != "" ]]; then
-						writePaper "${REPO_STATUS_COLOR}${line}"
+						writePaper "${REPO_STATUS_COLOR}  ${line}"
 					else
 						writePaper "${REPO_INFO_COLOR}    ${line}"
 					fi
 				done <<< "${GIT_STATUS_FILTERED}"
-				writePaper
 			fi
 		else
 			((BUZZ_COUNT++))
 			if [ "$ALL" = true ]; then
 				writePaper "${CLEAN_COLOR}${BASENAME} is ${BUZZWORD}."
-				if [ "$COMPACT" = false ]; then
-					writePaper
-				fi
 			fi
 		fi
 	fi
@@ -156,6 +150,7 @@ function iteration {
 
 while read -r line; do
 	if [ "$SHOW_FOLDER" = true ]; then
+		writePaper
 		writePaper "${PAPER_COLOR}From ${line}"
 		writePaper
 	fi
