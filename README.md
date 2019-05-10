@@ -1,19 +1,34 @@
-# GitDaily 0.3
+# GitDaily 0.4
 This is a bash shell script that allows you to easily see the status of all of your Git repositories. If you're like me, and you keep every single project in a different repository, it can be very useful to see on which repositories you need to work.
 
 ```
-gitdaily --all --compact
+$ gitdaily
 ```
 ```
-─────────────────────────────────────────────────
- GitDaily
-─────────────────────────────────────────────────
- dotfiles is clean.
- gitdaily is clean.
- dirtyrepo is not clean
-─────────────────────────────────────────────────
- # 2/3 clean  13:37:00
-─────────────────────────────────────────────────
+───────────────────────────────────────────────────────────
+  GitDaily
+───────────────────────────────────────────────────────────
+  dirtyrepo is not clean
+    Changes not staged for commit:
+      modified:   .bashrc
+───────────────────────────────────────────────────────────
+  66% of 3 repos clean
+───────────────────────────────────────────────────────────
+```
+
+```
+$ gitdaily --all --compact
+```
+```
+───────────────────────────────────────────────────────────
+  GitDaily
+───────────────────────────────────────────────────────────
+  dotfiles is clean
+  gitdaily is clean
+  dirtyrepo 1 file changed, 0 insertions(+), 0 deletions(-)
+───────────────────────────────────────────────────────────
+  66% of 3 repos clean
+───────────────────────────────────────────────────────────
 ```
 
 ## Configuration

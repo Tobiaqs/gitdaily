@@ -1,19 +1,19 @@
 # http://misc.flogisoft.com/bash/tip_colors_and_formatting
 # Foregrounds
-DEFAULT_FOREGROUND="\e[39m"
-ALPHA_COLOR="\e[94m"
-META_COLOR="\e[90m"
+ALPHA_COLOR="\e[38;5;160m"
+META_COLOR="\e[38;5;238m"
 PAPER_COLOR="\e[37m"
-CLEAN_COLOR="\e[92m"
-REPO_STATUS_COLOR="\e[96m"
-REPO_INFO_COLOR="\e[36m"
+CLEAN_COLOR="\e[38;5;46m"
+DIRTY_COLOR="\e[38;5;214m"
+REPO_STATUS_COLOR="\e[38;5;12m"
+REPO_INFO_COLOR="\e[38;5;14m"
 # Formats
 UNDERLINE_ON="\e[4m"
 BOLD_ON="\e[1m"
 STYLE_OFF="\e[0m"
 
 GITDAILY="${BOLD_ON}GitDaily${STYLE_OFF}"
-VERSION="0.3.1"
+VERSION="0.4.0"
 BUZZWORD="clean"
 
 REPO_COUNT=0
@@ -24,16 +24,16 @@ columns=`tput cols`
 for i in `seq $columns`; do PAPERLINE="${PAPERLINE}${line}"; done
 
 function openPaper {
-	echo -e "${META_COLOR}${PAPERLINE}"
-	writePaper "${ALPHA_COLOR}${GITDAILY}${META_COLOR}"
+	writePaper
+	writePaper "${ALPHA_COLOR}${GITDAILY}"
 	writePaper
 }
 
 function writePaper {
 	if [[ "${1}" == "" ]]; then
-		echo -e "${META_COLOR}${PAPERLINE}"
+		echo -e "${META_COLOR}${PAPERLINE}${STYLE_OFF}"
 	else
-		echo -e "${META_COLOR} ${1}"
+		echo -e "${PAPER_COLOR}  ${1}"
 	fi
 }
 
@@ -46,8 +46,9 @@ function closePaper {
 		writePaper
 	fi
 	local percentage=$((100*$BUZZ_COUNT/$REPO_COUNT))
-	writePaper "${PAPER_COLOR}${percentage}% of ${REPO_COUNT} repos ${BUZZWORD}${META_COLOR}"
-	echo -e "${META_COLOR}${PAPERLINE}${DEFAULT_FOREGROUND}"
+	# TODO: /usr/local/bin/gitdaily: line 48: 100*0/0: division by 0 (error token is "0")
+	writePaper "${CLEAN_COLOR}${percentage}%${STYLE_OFF} of ${REPO_COUNT} repos ${BUZZWORD}"
+	writePaper
 }
 
 # Arguments
@@ -63,24 +64,24 @@ do
 key="$1"
 case $key in
 	-h|--help)
-	echo -e "$GITDAILY will look for a configuration file in ~/.config/gitdaily_paths."
+	echo -e "${ALPHA_COLOR}$GITDAILY will look for a configuration file in ${CLEAN_COLOR}~/.config/gitdaily_paths.${STYLE_OFF}"
 	echo "See the readme for more information on the format of this file."
 	echo
-	echo "Usage options:"
-	echo "	-h, --help	Show help message"
-	echo "	-v, --version	Display version"
-	echo "	-a, --all	View status for all repositories, even ${BUZZWORD} ones"
-	echo "	-c, --compact	Compact view"
-	echo "	-l, --local	Run locally, view status of current directory"
-	echo "	-s, --subdir	Run locally, view status of subdirectories"
+	echo -e "${BOLD_ON}Usage options:${STYLE_OFF}"
+	echo -e "	${ALPHA_COLOR}-a, --all	${STYLE_OFF}View status for all repositories, even ${BUZZWORD} ones"
+	echo -e "	${ALPHA_COLOR}-c, --compact	${STYLE_OFF}Compact view"
+	echo -e "	${ALPHA_COLOR}-h, --help	${STYLE_OFF}Show help message"
+	echo -e "	${ALPHA_COLOR}-l, --local	${STYLE_OFF}Run locally, view status of current directory"
+	echo -e "	${ALPHA_COLOR}-p, --parent	${STYLE_OFF}Display parent directory of a repository"
+	echo -e "	${ALPHA_COLOR}-s, --subdir	${STYLE_OFF}Run locally, view status of subdirectories"
+	echo -e "	${ALPHA_COLOR}-v, --version	${STYLE_OFF}Display version"
 	echo
 	exit 0
 	;;
 	-v|--version)
 	openPaper
-	writePaper "${PAPER_COLOR}$GITDAILY version $VERSION"
-	writePaper "${PAPER_COLOR}Build with ☮ & ${BOLD_ON}♥${STYLE_OFF}"
-	echo -e "${META_COLOR}└${PAPERLINE}┘${DEFAULT_FOREGROUND}"
+	writePaper "$GITDAILY version $VERSION Build with ☮ & ${ALPHA_COLOR}${BOLD_ON}♥${STYLE_OFF}"
+	writePaper
 	exit 0
 	;;
 	-a|--all)
@@ -114,7 +115,7 @@ if [ "$FROM_CONFIG" = true ]; then
 		INPUT="`cat $HOME/.config/gitdaily_paths`"
 	else
 		writePaper "Configuration file not found at"
-		writePaper "${PAPER_COLOR}~/.config/gitdaily_paths"
+		writePaper "${CLEAN_COLOR}~/.config/gitdaily_paths"
 		writePaper "Checking local subdirectories"
 		writePaper
 		INPUT="`pwd` /*"
@@ -127,8 +128,11 @@ function iteration {
 		local GIT_STATUS=`git -C "$dir" status`
 		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${STYLE_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
-			writePaper "${ALPHA_COLOR}${BASENAME} is not ${BUZZWORD}."
-			if [ "$COMPACT" = false ]; then
+			if [ "$COMPACT" = true ]; then
+				local GIT_STATUS_COMPACT=`git -C "$dir" diff --shortstat`
+				writePaper "${DIRTY_COLOR}${BASENAME}${REPO_INFO_COLOR}${GIT_STATUS_COMPACT}"
+			else
+				writePaper "${DIRTY_COLOR}${BASENAME} is not ${BUZZWORD}"
 				GIT_STATUS_FILTERED=`echo "$GIT_STATUS" | grep "^	\|^Untracked files:\|^Changes not staged for commit:$\|^Changes to be committed:$"`
 
 				while read -r line; do
@@ -142,7 +146,7 @@ function iteration {
 		else
 			((BUZZ_COUNT++))
 			if [ "$ALL" = true ]; then
-				writePaper "${CLEAN_COLOR}${BASENAME} is ${BUZZWORD}."
+				writePaper "${CLEAN_COLOR}${BASENAME} is ${BUZZWORD}"
 			fi
 		fi
 	fi
@@ -151,7 +155,7 @@ function iteration {
 while read -r line; do
 	if [ "$SHOW_FOLDER" = true ]; then
 		writePaper
-		writePaper "${PAPER_COLOR}From ${line}"
+		writePaper "From ${line}"
 		writePaper
 	fi
 	if [[ "$line" == *"/*"* ]]; then
