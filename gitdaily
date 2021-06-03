@@ -13,15 +13,16 @@ BOLD_ON="\e[1m"
 STYLE_OFF="\e[0m"
 
 GITDAILY="${BOLD_ON}GitDaily${STYLE_OFF}"
-VERSION="0.4.0"
+VERSION="0.5.0"
 BUZZWORD="clean"
 
 REPO_COUNT=0
 BUZZ_COUNT=0
-line="─"
+LINEPART="─"
 PAPERLINE=""
-columns=`tput cols`
-for i in `seq $columns`; do PAPERLINE="${PAPERLINE}${line}"; done
+HASLINE=false
+columns=`stty size | cut -d" " -f2`
+for i in `seq $columns`; do PAPERLINE="${PAPERLINE}${LINEPART}"; done
 
 function openPaper {
 	writePaper
@@ -31,9 +32,13 @@ function openPaper {
 
 function writePaper {
 	if [[ "${1}" == "" ]]; then
-		echo -e "${META_COLOR}${PAPERLINE}${STYLE_OFF}"
+		if [[ $HASLINE == false ]]; then
+			echo -e "${META_COLOR}${PAPERLINE}${STYLE_OFF}"	
+			HASLINE=true
+		fi
 	else
 		echo -e "${PAPER_COLOR}  ${1}"
+		HASLINE=false
 	fi
 }
 
@@ -45,9 +50,10 @@ function closePaper {
 		done <<< "${MESSAGE}"
 		writePaper
 	fi
-	local percentage=$((100*$BUZZ_COUNT/$REPO_COUNT))
-	# TODO: /usr/local/bin/gitdaily: line 48: 100*0/0: division by 0 (error token is "0")
-	writePaper "${CLEAN_COLOR}${percentage}%${STYLE_OFF} of ${REPO_COUNT} repos ${BUZZWORD}"
+	if [[ $REPO_COUNT -gt 0 ]]; then
+		local percentage=$((100*$BUZZ_COUNT/$REPO_COUNT))
+		writePaper "${CLEAN_COLOR}${percentage}%${STYLE_OFF} of ${REPO_COUNT} repos ${BUZZWORD}"
+	fi
 	writePaper
 }
 
@@ -123,13 +129,13 @@ if [ "$FROM_CONFIG" = true ]; then
 fi
 
 function iteration {
-	if [[ -d "$dir" && -d "$dir/.git" ]]; then
+	if [[ -d "${1}" && -d "${1}/.git" ]]; then
 		((REPO_COUNT++))
-		local GIT_STATUS=`git -C "$dir" status`
-		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "$dir")${STYLE_OFF}"
+		local GIT_STATUS=`git -C "${1}" status`
+		local BASENAME="${BOLD_ON}${UNDERLINE_ON}$(basename "${1}")${STYLE_OFF}"
 		if [[ "$GIT_STATUS" != *"clean"* ]]; then
 			if [ "$COMPACT" = true ]; then
-				local GIT_STATUS_COMPACT=`git -C "$dir" diff --shortstat`
+				local GIT_STATUS_COMPACT=`git -C "${1}" diff --shortstat`
 				writePaper "${DIRTY_COLOR}${BASENAME}${REPO_INFO_COLOR}${GIT_STATUS_COMPACT}"
 			else
 				writePaper "${DIRTY_COLOR}${BASENAME} is not ${BUZZWORD}"
@@ -162,7 +168,7 @@ while read -r line; do
 		line=`eval echo "${line%/*}"`
 		if [ -d "$line" ]; then
 			for dir in $line/*; do
-				iteration
+				iteration $dir
 			done
 		else
 			writePaper "$dir (from config) does not exist!"
@@ -170,7 +176,7 @@ while read -r line; do
 	else
 		dir=`eval echo "$line"`
 		if [ -d "$dir" ]; then
-			iteration
+			iteration $dir
 		else
 			writePaper "$dir (from config) does not exist!"
 		fi
